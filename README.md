@@ -7,6 +7,7 @@ This is a beginner-friendly Library Management application built with Flask and 
 - Charge fees on late returns (7-day grace period)
 - Import books from Frappe Library API
 - Simple Bootstrap-based UI
+- Dark/Light Mode
 
 # Run locally
 cd library_app
