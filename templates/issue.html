@@ -1,0 +1,64 @@
+	<!doctype html>
+<html>
+<head>
+  <title>Issue Book</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="p-4">
+<div class="container">
+<div class="d-flex justify-content-end mb-3">
+    <button id="theme-toggle" class="btn btn-outline-secondary">🌙 Dark Mode</button>
+</div>
+  <h2>Issue Book</h2>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="alert alert-info">
+        {% for m in messages %} <div>{{ m }}</div> {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  <form method="post">
+    <div class="mb-2">
+      <label>Book</label>
+      <select name="book_id" class="form-select">
+        {% for b in books %}
+          <option value="{{ b['id'] }}">{{ b['title'] }} (Stock: {{ b['stock'] }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-2">
+      <label>Member</label>
+      <select name="member_id" class="form-select">
+        {% for m in members %}
+          <option value="{{ m['id'] }}">{{ m['name'] }} (Debt: ₹{{ m['debt'] }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn btn-success">Issue</button>
+  </form>
+</div>
+<script>
+  const toggleButton = document.getElementById('theme-toggle');
+  const body = document.body;
+
+  // Load stored theme
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    body.classList.add('dark-mode');
+    toggleButton.textContent = '☀️ Light Mode';
+  }
+
+  toggleButton.addEventListener('click', () => {
+    body.classList.toggle('dark-mode');
+    if (body.classList.contains('dark-mode')) {
+      localStorage.setItem('theme', 'dark');
+      toggleButton.textContent = '☀️ Light Mode';
+    } else {
+      localStorage.setItem('theme', 'light');
+      toggleButton.textContent = '🌙 Dark Mode';
+    }
+  });
+</script>
+</body>
+</html>

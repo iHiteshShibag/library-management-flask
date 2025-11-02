@@ -1,0 +1,55 @@
+body {
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+/* Default Light Theme */
+body {
+  background-color: #f8f9fa !important;
+  color: #212529 !important;
+}
+
+/* Dark background and text */
+.dark-mode {
+  background-color: #121212 !important;
+  color: #f8f9fa !important;
+}
+
+/* Table fixes */
+.dark-mode .table {
+  background-color: #1e1e1e !important;
+  color: #fff !important;
+}
+
+.dark-mode .table th,
+.dark-mode .table td {
+  background-color: #1e1e1e !important;
+  color: #f8f9fa !important;
+  border-color: #333 !important;
+}
+
+/* Remove white zebra stripes from striped table */
+.dark-mode .table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: #2a2a2a !important;
+}
+
+/* Buttons and links */
+.dark-mode .btn,
+.dark-mode a {
+  color: #f8f9fa !important;
+  border-color: #666 !important;
+}
+
+/* Inputs and selects */
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+  background-color: #2a2a2a !important;
+  color: #fff !important;
+  border: 1px solid #555 !important;
+}
+
+/* Flash messages or alerts */
+.dark-mode .alert {
+  background-color: #333 !important;
+  color: #fff !important;
+  border-color: #555 !important;
+}
