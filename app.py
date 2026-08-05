@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+
 from flask import Flask, render_template
 from flask_login import current_user
 from flask_socketio import join_room, disconnect
