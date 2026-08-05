@@ -231,25 +231,6 @@ pytest
 
 ---
 
-## 📸 Screenshots
-
-*(Add screenshots of your application here by replacing the placeholder links)*
-
-### Animated Dashboard
-<img width="959" alt="Dashboard Screenshot" src="https://via.placeholder.com/959x510.png?text=Animated+Dashboard" />
-
----
-
-### Book Management & Bulk Import
-<img width="959" alt="Books Screenshot" src="https://via.placeholder.com/959x510.png?text=Book+Management" />
-
----
-
-### Transaction History & Fines
-<img width="959" alt="Transactions Screenshot" src="https://via.placeholder.com/959x510.png?text=Transactions+%26+Fines" />
-
----
-
 ## 🗺️ Roadmap
 
 - [x] RESTful API implementation
