@@ -18,6 +18,8 @@ if not DATABASE_URL:
         'DATABASE_URL is not set. Copy .env.example to .env and point it at your '
         'Postgres instance (e.g. postgresql://library:library_dev_pw@localhost:5432/library).'
     )
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 # Optional: password-reset emails and due-date reminders. If unset, these are
 # logged/flashed instead of sent (see mailer.py) so the app still works in dev.
