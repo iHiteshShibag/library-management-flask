@@ -6,7 +6,7 @@
 
 A robust, modern platform with role-based staff accounts, a complete book/member/loan workflow, automatic fines, reservations, audit logging, a comprehensive REST API, and a beautiful dashboard.
 
-**Live Demo:** [Add your Vercel/Render link here]
+**Live Demo:** https://library-management-flask-e0zz.onrender.com
 
 ---
 
