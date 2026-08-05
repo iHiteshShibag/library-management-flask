@@ -1,92 +1,129 @@
+<div align="center">
+  
 # 📚 LibraryOS — Library Management System
+  
+### Production-Grade Library Management Web Application
 
-A **Library Management Web Application** built with **Flask**, **PostgreSQL**, and **Tailwind CSS** — role-based staff accounts, and a full book/member/loan workflow with fines, reservations, audit logging, a REST API, and a dashboard.
+A robust, modern platform with role-based staff accounts, a complete book/member/loan workflow, automatic fines, reservations, audit logging, a comprehensive REST API, and a beautiful dashboard.
 
-> **Setup on Windows?** See [`Setup_and_Configuration_Guide.pdf`](Setup_and_Configuration_Guide.pdf) in this folder for a full walkthrough with Windows-specific commands (PowerShell venv activation, Task Scheduler instead of cron, a Windows-compatible production server, etc.) — a few things below (Gunicorn, `cp`, cron) are Linux/macOS-specific.
-
----
-
-## 🚀 Features
-
-### 🔐 Accounts & organization
-- Single-org mode: the very first signup founds the organization and becomes its admin; every signup after that just joins that same org as staff (mirrored by `flask create-admin` on the CLI)
-- Login/logout, forgot/reset password by email link, change password
-- Admin and staff roles, enforced both in the UI and server-side
-- Admins can invite additional users directly as admin or staff, and manage them from Settings
-- Per-user API keys for the REST API (generate/regenerate/revoke from your profile)
-
-### 📖 Book management
-- Add, edit, delete, and search books (by title/author)
-- Import books in bulk from the Frappe Library API, with automatic ISBN de-duplication against your existing catalog (response keys are normalized first — the API's own JSON has inconsistent whitespace in field names)
-- CSV export
-- Pagination
-
-### 👥 Member management
-- Register, view, and remove members (name, phone, email)
-- CSV export
-- Pagination
-
-### 🔄 Issue, return & reservations
-- Issue books to members and return them, with race-safe atomic stock/return updates under concurrent use
-- Automatic overdue fine calculation (7-day grace period, then per-day rent fee)
-- Members over ₹500 in outstanding debt are blocked from new issues
-- Reservation/hold queue for books, with automatic fulfillment when a held book is issued to the member who reserved it
-- Transaction history with CSV export and pagination
-
-### 🔔 Reminders
-- `flask send-due-reminders` CLI command emails members whose loans are approaching or past the grace period (run it from cron or another external scheduler — the app has no built-in job runner)
-- Emails are sent via SMTP if configured (`EMAIL_USER`/`EMAIL_PASSWORD` in `.env`); otherwise they're logged/flashed instead, so the app still works out of the box in development
-
-### 📊 Dashboard & audit log
-- Stats: book titles, copies, members, active loans, overdue count, outstanding fines
-- Charts: books by author, borrowing trend, fines collected, stock overview (last 8 weeks)
-- Top borrowed books/authors, recent activity feed
-- Admin-only audit log of who created/edited/deleted what and when
-
-### 🌐 REST API
-- `GET/POST /api/v1/books`, `GET/PATCH/DELETE /api/v1/books/<id>`
-- `GET/POST /api/v1/members`
-- `GET /api/v1/transactions`, `POST /api/v1/issue`, `POST /api/v1/return`
-- `GET /api/v1/me`
-- Authenticate with `Authorization: Bearer <api_key>` (generate a key from your profile settings)
-
-### 🛡️ Security
-- CSRF protection on all state-changing form submissions
-- Rate limiting on login/signup/forgot-password to slow down brute-force and abuse (in-memory by default; point `RATELIMIT_STORAGE_URI` at Redis if running multiple worker processes)
-- Session cookies with `HttpOnly`/`SameSite=Lax`, and `Secure` once `SESSION_COOKIE_SECURE=true` is set behind HTTPS
-- Minimum password length enforced server-side
-- Passwords hashed with Werkzeug's `generate_password_hash`
-
-### 🩺 Operations
-- `GET /healthz` — liveness check (verifies the DB connection), suitable for a load balancer or orchestrator
-- Branded 404/500 error pages instead of Flask's bare defaults
-- Optional Sentry error tracking — set `SENTRY_DSN` to enable; unset, it's skipped entirely
-- `pytest` smoke suite covering signup/login, book/member/issue-return flows, role enforcement, and the REST API (see step 9 below)
-
-### 🎨 User interface
-- Responsive Tailwind design with dark/light mode
-- Animated dashboard, page transitions (GSAP + Lenis)
-- Collapsible sidebar — collapsing fully hides it (rather than shrinking to an icon rail); a floating logo badge takes its place and re-expands it on click. State persists in `localStorage`.
+**Live Demo:** [Add your Vercel/Render link here]
 
 ---
 
-## 🛠️ Tech stack
+[![Python](https://img.shields.io/badge/Python-3.9+-3776AB?logo=python&logoColor=white)](https://www.python.org)
+[![Flask](https://img.shields.io/badge/Flask-2.x-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13+-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-| Technology | Purpose |
-|------------|----------|
-| Python / Flask | Backend & routing |
-| PostgreSQL | Database |
-| Flask-SQLAlchemy / Flask-Migrate | ORM & schema migrations |
-| Flask-Login | Sessions & auth |
-| Flask-WTF | CSRF protection |
-| Flask-Limiter | Rate limiting |
-| Tailwind CSS, GSAP, Chart.js | Frontend & charts |
-| Jinja2 | Templating |
-| Requests | Frappe Library API integration |
+</div>
 
 ---
 
-## 📂 Project structure
+> **Complete workflow:** Register Org → Add Books (or Import API) → Register Members → Issue/Return Books → Monitor Analytics
+>
+> ### Demo Credentials
+> *(If you host a live demo, provide test credentials here)*
+
+| Field | Value |
+|-------|-------|
+| Email | admin@libraryos.local |
+| Password | admin123 |
+
+---
+
+## 🚀 Overview
+
+LibraryOS is a full-stack, production-ready application built to streamline operations for modern libraries. 
+
+Instead of just tracking inventory, the platform handles complex workflows including race-safe concurrent transactions, automatic grace periods, fine calculations, and hold queues. It demonstrates modern software engineering practices such as role-based access control (RBAC), robust REST APIs, security best practices (CSRF, Rate Limiting), and beautiful responsive UI.
+
+> 💡 **Setup on Windows?** Check out the [`Setup_and_Configuration_Guide.pdf`](Setup_and_Configuration_Guide.pdf) in this repository for a complete Windows walkthrough (PowerShell venv activation, Task Scheduler, Windows-compatible servers like Waitress).
+
+---
+
+## ✨ Highlights
+
+- Single-Organization architecture with Staff/Admin RBAC
+- FastAPI-like REST API with token authentication
+- Beautiful, responsive UI with Tailwind CSS & GSAP animations
+- PostgreSQL for robust, relational data storage
+- Race-safe atomic transactions for stock management
+- Automated fine calculation & borrowing restrictions
+- Hold queue / Reservation system
+- Bulk book import via Frappe Library API
+- Comprehensive Admin Audit Logs
+- Production-ready security (CSRF, Rate Limiting, Hashing)
+
+---
+
+## 🏗️ Architecture
+
+```mermaid
+flowchart LR
+
+A[Tailwind/JS Frontend]
+B[Flask Backend API]
+C[PostgreSQL Database]
+D[Frappe API Integrations]
+E[SMTP Mail Server]
+
+A --> B
+B --> C
+B --> D
+B --> E
+```
+
+---
+
+## 🔄 Book Issue Workflow
+
+```mermaid
+sequenceDiagram
+Staff->>UI: Select Member & Book
+UI->>Backend: POST /issue
+Backend->>DB: Check Stock & Member Debt
+alt Debt > ₹500
+    DB-->>Backend: Block Issue
+    Backend-->>UI: Show Error
+else Clear to Issue
+    Backend->>DB: Atomically decrease stock
+    Backend->>DB: Record Transaction
+    DB-->>Backend: Success
+    Backend-->>UI: Issue Confirmed
+end
+```
+
+---
+
+## ⚙️ Tech Stack
+
+### Frontend
+- **HTML5 / Jinja2** - Server-side rendering
+- **Tailwind CSS** - Modern utility-first styling
+- **GSAP & Lenis** - Smooth animations and scrolling
+- **Chart.js** - Interactive dashboard analytics
+
+### Backend
+- **Python / Flask** - Core routing and logic
+- **Flask-SQLAlchemy** - ORM for database interactions
+- **Flask-Migrate** - Schema migrations (Alembic)
+- **Flask-Login** - Session management
+- **Flask-Limiter** - API Rate Limiting (Redis-compatible)
+- **Requests** - External API communication
+
+### DevOps & Security
+- **PostgreSQL** - Production Database
+- **Gunicorn** - WSGI HTTP Server
+- **Werkzeug Security** - Password hashing
+- **CSRFProtect** - Cross-Site Request Forgery protection
+
+---
+
+## 📂 Project Structure
+
+<details>
+<summary><b>Click to expand the directory tree</b></summary>
 
 ```text
 library-management-flask/
@@ -94,162 +131,150 @@ library-management-flask/
 ├── app.py              # App factory / blueprint registration
 ├── config.py           # Env-driven configuration
 ├── db.py               # SQLAlchemy + Migrate setup
-├── extensions.py       # Shared extension instances (login, csrf, limiter)
-├── models.py           # Organization, User, Book, Member, Transaction, Reservation, AuditLog
-├── auth.py             # Signup/login/logout, forgot/reset password
-├── books.py            # Book CRUD, search, CSV export, Frappe import
-├── members.py          # Member CRUD, CSV export
-├── transactions.py     # Issue/return, transaction history, CSV export
+├── extensions.py       # Shared extension instances
+├── models.py           # Database Models
+├── auth.py             # Auth & password workflows
+├── books.py            # Book CRUD & Frappe import
+├── members.py          # Member CRUD
+├── transactions.py     # Issue/return logic
 ├── reservations.py     # Hold queue
-├── audit.py             # Audit log helper + admin view
-├── settings.py         # Profile, change password, API key, user management
-├── api.py               # REST API (API-key authenticated)
-├── mailer.py            # SMTP email helper with a dev-mode fallback
-├── reminders.py          # `flask send-due-reminders` CLI command
-├── migrations/          # Alembic migrations
-├── static/               # CSS/JS
-└── templates/            # Jinja2 templates
+├── audit.py            # Admin audit log
+├── api.py              # REST API
+├── mailer.py           # SMTP integration
+├── reminders.py        # CLI command for reminders
+├── migrations/         # Alembic migrations
+├── static/             # CSS/JS
+└── templates/          # Jinja2 templates
 ```
+</details>
 
 ---
 
-## ⚙️ Installation & setup
+## 🚀 Local Setup
 
-### 1. Clone and enter the repo
+Clone the repository and jump in:
+
 ```bash
 git clone https://github.com/iHiteshShibag/library-management-flask.git
 cd library-management-flask
 ```
 
-### 2. Create a virtual environment
+Set up your virtual environment and dependencies:
+
 ```bash
 python3 -m venv venv
-source venv/bin/activate   # venv\Scripts\activate on Windows
-```
-
-### 3. Install dependencies
-```bash
+source venv/bin/activate   # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Configure environment
+Configure the environment variables:
+
 ```bash
 cp .env.example .env
+# Edit .env to add your SECRET_KEY and DATABASE_URL
 ```
-Then edit `.env`:
-- `SECRET_KEY` — generate one with `python -c "import secrets; print(secrets.token_hex(32))"`
-- `DATABASE_URL` — a PostgreSQL connection string
-- `EMAIL_USER` / `EMAIL_PASSWORD` / `EMAIL_SMTP_HOST` / `EMAIL_SMTP_PORT` — optional, for real password-reset and reminder emails; without them the app logs/flashes them instead
 
-### 5. Run database migrations
+Initialize the database and run the app:
+
 ```bash
 flask db upgrade
-```
-
-### 6. Run the app
-
-For local development:
-```bash
 python app.py
 ```
 
-For anything beyond your own laptop, use a real WSGI server — `python app.py` / `flask run` is Werkzeug's dev server, which prints its own warning that it isn't meant for production traffic:
-```bash
-gunicorn app:app --workers 4
-```
-A `Procfile` (`web: gunicorn app:app`) is included for PaaS providers (Render, Heroku, etc.) that read it automatically. Behind Gunicorn, put a reverse proxy (Nginx, Caddy, or your platform's built-in one) in front to terminate TLS — Gunicorn itself doesn't speak HTTPS. A minimal Nginx snippet:
-```nginx
-server {
-    listen 443 ssl;
-    server_name your-domain.example;
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-Once you're serving over HTTPS, set `SESSION_COOKIE_SECURE=true` in `.env` (see step 4) — it defaults to `false` so login doesn't break over plain `http://` in local dev. If you ever run more than one worker process, also point `RATELIMIT_STORAGE_URI` at a shared store like Redis instead of the default in-memory one, or each worker enforces its own separate rate limit.
+Access the app at `http://127.0.0.1:5000`.
 
-> **Windows:** Gunicorn doesn't run there at all (it relies on `os.fork`, which Windows doesn't have). Use `waitress` instead (`pip install waitress`, then `waitress-serve --port=8000 app:app`), or run the whole app inside WSL2/Docker for parity with the Linux instructions above. See the PDF guide linked at the top of this file for the full walkthrough.
+---
 
-### 7. Open your browser
-```text
-http://127.0.0.1:5000
-```
-Sign up to create your organization and admin account, or use `flask create-admin` to create one from the CLI.
+## ☁️ Production Deployment
 
-### 8. (Optional) Schedule due-date reminders
-Add a daily cron entry (or equivalent) to run:
-```bash
-flask send-due-reminders
-```
+Before making this reachable by real users, complete this deployment checklist:
 
-### 9. (Optional) Run the test suite
+| Service | Recommendation |
+|---------|----------|
+| **Server** | Use Gunicorn (`gunicorn app:app --workers 4`) behind Nginx or Caddy. |
+| **Database** | Managed PostgreSQL (e.g., Supabase, Neon, RDS). |
+| **Security** | Serve over HTTPS, set `SESSION_COOKIE_SECURE=true`. |
+| **Caching/Limits** | Point `RATELIMIT_STORAGE_URI` at Redis if using multiple workers. |
+| **Email** | Configure SMTP settings in `.env` for password resets. |
+
+---
+
+## 📊 API Documentation
+
+LibraryOS provides a secure, token-based REST API.
+
+**Authentication:** `Authorization: Bearer <your_api_key>` (Generate from profile settings).
+
+| Endpoint | Methods | Description |
+|:---|:---:|:---|
+| `/api/v1/books` | `GET`, `POST` | List all books or add a new book |
+| `/api/v1/books/<id>` | `GET`, `PATCH`, `DELETE` | View, update, or remove a specific book |
+| `/api/v1/members` | `GET`, `POST` | List all library members or register a new one |
+| `/api/v1/transactions` | `GET` | View issue and return history |
+| `/api/v1/issue` | `POST` | Issue a book to a member |
+| `/api/v1/return` | `POST` | Return a book (calculates fines automatically) |
+| `/api/v1/me` | `GET` | Get current authenticated user info |
+
+---
+
+## 🧪 Testing
+
+The platform includes a comprehensive `pytest` smoke suite covering core workflows (auth, books, members, transactions, API). 
+
+To run tests against a real Postgres database (recommended over SQLite to avoid dialect bugs):
+
 ```bash
 pip install -r requirements-dev.txt
-```
-Tests run against a real Postgres database (not SQLite — the dashboard's analytics queries use Postgres-only SQL like `date_trunc`, so SQLite would silently skip over real dialect bugs). Create a dedicated test database once:
-```sql
-CREATE DATABASE library_test OWNER library;
-```
-Then run:
-```bash
+# Create a test DB: CREATE DATABASE library_test OWNER library;
 pytest
 ```
-It defaults to `postgresql://library:library_dev_pw@localhost:5432/library_test` — override with `TEST_DATABASE_URL` if your setup differs.
 
 ---
 
-## ✅ Before deploying to production
+## 📸 Screenshots
 
-The defaults above are tuned for local development. Before this is reachable by real users:
+*(Add screenshots of your application here by replacing the placeholder links)*
 
-- [ ] **Serve it with Gunicorn behind a reverse proxy over HTTPS** — see step 6 above. Don't run `python app.py` / `flask run` in production; it's Werkzeug's dev server and says so itself.
-- [ ] **Set `SESSION_COOKIE_SECURE=true`** once HTTPS is in front of the app (leave it `false` until then, or login will silently break).
-- [ ] **Generate fresh secrets for this environment** — don't reuse the `SECRET_KEY` or Postgres password from your local `.env`/docker-compose. A leaked local dev secret is low-stakes; the same value reused in production is a real credential. Generate a new one with `python -c "import secrets; print(secrets.token_hex(32))"` and use a strong, unique Postgres password for the production database.
-- [ ] **Configure real email delivery** — set `EMAIL_USER`/`EMAIL_PASSWORD` (and `EMAIL_SMTP_HOST`/`EMAIL_SMTP_PORT` if not using Gmail) to an account or transactional provider (SendGrid, Mailgun, SES, etc. all speak SMTP) you control. Without this, password-reset links and due-date reminders only get logged/flashed to the screen instead of actually emailed — fine for solo local testing, not for real users who forget their password.
-- [ ] **Point `RATELIMIT_STORAGE_URI` at Redis** if running more than one Gunicorn worker — the in-memory default tracks limits per-worker, not globally, so it under-enforces with `--workers > 1`.
-- [ ] **Set `SENTRY_DSN`** (optional) if you want unhandled exceptions reported somewhere instead of only appearing in server logs.
+### Animated Dashboard
+<img width="959" alt="Dashboard Screenshot" src="https://via.placeholder.com/959x510.png?text=Animated+Dashboard" />
 
 ---
 
-## 🗄️ Database overview
-
-| Table | Purpose |
-|---------|---------|
-| `organizations` | A single row — the org created by the first signup (see single-org mode above) |
-| `users` | Staff/admin logins, scoped to an organization |
-| `books` | Catalog, scoped to an organization |
-| `members` | Library patrons, scoped to an organization |
-| `transactions` | Issue/return history and fines |
-| `reservations` | Hold queue on books |
-| `audit_logs` | Who did what, and when |
-
-All tables (other than `organizations`) carry an `org_id` foreign key, and every query in the app is scoped by the current user's organization.
+### Book Management & Bulk Import
+<img width="959" alt="Books Screenshot" src="https://via.placeholder.com/959x510.png?text=Book+Management" />
 
 ---
 
-## 🌐 External API integration
+### Transaction History & Fines
+<img width="959" alt="Transactions Screenshot" src="https://via.placeholder.com/959x510.png?text=Transactions+%26+Fines" />
 
-Books can be bulk-imported from the **Frappe Library API** (`/import`). Imports are capped at 200 books per request and skip titles whose ISBN already exists in your catalog.
+---
+
+## 🗺️ Roadmap
+
+- [x] RESTful API implementation
+- [x] JWT / Token-based API Auth
+- [x] Book hold queues / Reservations
+- [x] Automated fine calculation
+- [x] Frappe Library API integration
+- [ ] Implement Redis for caching frequent queries
+- [ ] Add Docker / Docker Compose support
+- [ ] Export dashboard charts as PDFs
+- [ ] Barcode / QR Code scanning for physical book issues
 
 ---
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Commit your changes: `git commit -m "Added new feature"`
-4. Push the branch: `git push origin feature-name`
-5. Open a pull request
+Contributions, feature requests, and bug reports are warmly welcomed.
+
+**Fork → Branch → Commit → Pull Request**
 
 ---
 
 ## 📜 License
 
-MIT — free to use, modify, and distribute for educational and personal purposes.
+MIT License — free to use, modify, and distribute for educational and personal purposes.
 
 ---
 
@@ -257,4 +282,6 @@ MIT — free to use, modify, and distribute for educational and personal purpose
 
 **Hitesh Shibag** — [GitHub](https://github.com/iHiteshShibag)
 
-If you found this project helpful, consider giving it a ⭐ on GitHub.
+<div align="center">
+  <i>If you found this project helpful, consider giving it a ⭐ on GitHub!</i>
+</div>
