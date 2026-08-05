@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Books{% endblock %}
+{% block page_title %}Books{% endblock %}
+{% block content %}
+
+<div class="appear flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" style="animation-delay: 0ms">
+  <form method="get" class="flex gap-2 max-w-md w-full">
+    <input name="q" value="{{ q }}" placeholder="Search by title or author"
+           class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+    <button class="shrink-0 rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Search</button>
+  </form>
+  <div class="flex gap-2 shrink-0">
+    <a href="{{ url_for('books.export_books_csv') }}" class="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+      Export CSV
+    </a>
+    <a href="{{ url_for('books.import_books') }}" class="rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 text-center transition-colors shadow-lg shadow-brand-500/30">
+      Import books
+    </a>
+  </div>
+</div>
+
+<div class="appear rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl shadow-sm overflow-hidden" style="animation-delay: 80ms">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="text-xs uppercase text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/40">
+        <tr>
+          <th class="text-left font-medium px-5 py-2.5">Title</th>
+          <th class="text-left font-medium px-5 py-2.5">Author(s)</th>
+          <th class="text-left font-medium px-5 py-2.5">Stock</th>
+          <th class="text-left font-medium px-5 py-2.5">Rent</th>
+          <th class="text-right font-medium px-5 py-2.5">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+        {% for b in books %}
+        <tr class="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40">
+          <td class="px-5 py-3 font-medium text-slate-900 dark:text-white">{{ b.title }}</td>
+          <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ b.authors }}</td>
+          <td class="px-5 py-3">
+            {% if b.stock > 0 %}
+              <span class="inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 px-2.5 py-0.5 text-xs font-medium">{{ b.stock }} in stock</span>
+            {% else %}
+              <span class="inline-flex items-center rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 px-2.5 py-0.5 text-xs font-medium">Out of stock</span>
+            {% endif %}
+          </td>
+          <td class="px-5 py-3">₹{{ '%.2f'|format(b.rent_fee) }}</td>
+          <td class="px-5 py-3 text-right space-x-2 whitespace-nowrap">
+            <a href="{{ url_for('books.edit_book', book_id=b.id) }}" class="inline-flex rounded-lg border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Edit</a>
+            {% if current_user.role == 'admin' %}
+            <form class="inline" method="post" action="{{ url_for('books.delete_book', book_id=b.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="rounded-lg border border-red-200 dark:border-red-900 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40" onclick="return confirm('Delete this book?')">Delete</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="px-5 py-6 text-center text-slate-400">No books found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if pagination.pages > 1 %}
+  <div class="flex items-center justify-between px-5 py-3 border-t border-slate-200/70 dark:border-slate-800 text-sm">
+    <span class="text-slate-500 dark:text-slate-400">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+    <div class="flex gap-2">
+      {% if pagination.has_prev %}
+        <a href="{{ url_for('books.books', q=q, page=pagination.prev_num) }}" class="rounded-lg border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Previous</a>
+      {% endif %}
+      {% if pagination.has_next %}
+        <a href="{{ url_for('books.books', q=q, page=pagination.next_num) }}" class="rounded-lg border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Next</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="appear rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl shadow-sm p-5" style="animation-delay: 160ms">
+  <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Add a book</h2>
+  <form method="post" action="{{ url_for('books.add_book') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input name="title" placeholder="Title" required
+           class="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 lg:col-span-2">
+    <input name="authors" placeholder="Authors"
+           class="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 lg:col-span-2">
+    <input name="stock" type="number" placeholder="Stock" value="1"
+           class="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+    <input name="rent_fee" type="number" step="0.01" placeholder="Rent fee" value="10"
+           class="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+    <button data-magnetic="0.15" class="rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 transition-colors">Add book</button>
+  </form>
+</div>
+{% endblock %}

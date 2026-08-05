@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}LibraryOS — Modern library management{% endblock %}
+{% block guest_content %}
+<style>
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
+    50% { transform: translateY(-16px) rotate(var(--tilt, 0deg)); }
+  }
+  .float-badge { animation: float 5s ease-in-out infinite; }
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .orbit { animation: spin-slow 40s linear infinite; }
+  .orbit-reverse { animation: spin-slow 55s linear infinite reverse; }
+  @keyframes blob-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+  .blob-pulse { animation: blob-pulse 7s ease-in-out infinite; }
+  /* .reveal is a no-JS-fallback baseline only: elements start visible.
+     hero-motion.js / motion-core.js drive the actual entrance via GSAP;
+     if a script fails to load, content simply stays in this static state
+     instead of getting stuck hidden. */
+</style>
+
+<div class="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 overflow-x-hidden">
+
+  <!-- Nav -->
+  <header id="hero-nav" class="sticky top-0 z-20 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-brand-500/30">L</div>
+        <span class="font-semibold text-slate-900 dark:text-white">LibraryOS</span>
+      </div>
+      <nav class="hidden sm:flex items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-300">
+        <a href="#features" class="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Features</a>
+        <a href="#how-it-works" class="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">How it works</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="{{ url_for('auth.login') }}" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Log in</a>
+        <a href="{{ url_for('auth.signup') }}" class="rounded-full bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2 transition-colors shadow-lg shadow-brand-500/30">Get started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero: Circle-Website-style illustration with floating stat bubbles -->
+  <section id="hero" class="relative overflow-hidden bg-gradient-to-br from-teal-50 via-emerald-50/60 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-brand-950">
+    <div class="max-w-6xl mx-auto px-6 pt-20 pb-28 relative grid lg:grid-cols-2 gap-12 items-center">
+      <div class="relative z-10">
+        <span id="hero-badge" class="inline-flex items-center gap-2 rounded-full border border-brand-200 dark:border-brand-800/60 bg-white/70 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 text-xs font-medium px-3 py-1 mb-6">
+          <span class="h-1.5 w-1.5 rounded-full bg-brand-500"></span>
+          Now multi-tenant &amp; built for teams
+        </span>
+        <h1 id="hero-headline" class="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
+          Your next chapter starts here.
+        </h1>
+        <p id="hero-subtext" class="mt-5 text-lg text-slate-600 dark:text-slate-400 max-w-lg">
+          Catalog management, issue &amp; return tracking, member fines, and role-based staff
+          access — one workspace per organization, isolated and secure.
+        </p>
+        <div id="hero-ctas" class="mt-8 flex flex-wrap items-center gap-4">
+          <a href="{{ url_for('auth.signup') }}" data-magnetic="0.4" class="rounded-full bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-7 py-3.5 transition-colors shadow-lg shadow-brand-500/30">
+            Start for free
+          </a>
+          <a href="#features" data-magnetic="0.3" class="rounded-full border border-slate-300 dark:border-slate-700 text-sm font-medium px-7 py-3.5 text-slate-700 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800 transition-colors">
+            See how it works
+          </a>
+        </div>
+        <p id="hero-note" class="mt-4 text-xs text-slate-400 dark:text-slate-500">No credit card required. Free for your first organization.</p>
+      </div>
+
+      <!-- Floating illustration -->
+      <div id="hero-illustration" class="relative h-80 sm:h-96 flex items-center justify-center">
+        <!-- dashed orbit rings (continuous spin added by hero-motion.js once entrance completes) -->
+        <svg id="hero-orbit-1" class="absolute w-72 h-72 sm:w-80 sm:h-80 text-brand-300/60 dark:text-brand-700/50" viewBox="0 0 100 100" fill="none">
+          <circle cx="50" cy="50" r="46" stroke="currentColor" stroke-width="0.75" stroke-dasharray="3 5"/>
+        </svg>
+        <svg id="hero-orbit-2" class="absolute w-56 h-56 sm:w-64 sm:h-64 text-sky-300/60 dark:text-sky-700/50" viewBox="0 0 100 100" fill="none">
+          <circle cx="50" cy="50" r="46" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 6"/>
+        </svg>
+
+        <!-- central blob with book icon -->
+        <div id="hero-blob" class="relative h-40 w-40 sm:h-48 sm:w-48 rounded-full bg-gradient-to-br from-brand-400 to-brand-700 shadow-2xl shadow-brand-500/40 grid place-items-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" class="w-16 h-16 sm:w-20 sm:h-20">
+            <path d="M4 5.5C4 4.7 4.7 4 5.5 4H10a2 2 0 0 1 2 2v14a1.5 1.5 0 0 0-1.5-1.5H4z"/>
+            <path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H14a2 2 0 0 0-2 2v14a1.5 1.5 0 0 1 1.5-1.5H20z"/>
+          </svg>
+        </div>
+
+        <!-- floating stat badges (continuous bob added by hero-motion.js once entrance completes) -->
+        <div class="hero-float absolute top-2 left-0 sm:left-4 rounded-2xl bg-white dark:bg-slate-900 shadow-xl px-4 py-3 flex items-center gap-3" style="--tilt:-3deg;">
+          <div class="h-9 w-9 rounded-full bg-brand-100 dark:bg-brand-900/40 grid place-items-center text-brand-600 dark:text-brand-300 font-bold text-xs">128+</div>
+          <div>
+            <p class="text-sm font-semibold text-slate-900 dark:text-white">Book titles</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500">cataloged</p>
+          </div>
+        </div>
+
+        <div class="hero-float absolute top-6 right-0 sm:right-2 rounded-2xl bg-white dark:bg-slate-900 shadow-xl px-4 py-3 flex items-center gap-3" style="--tilt:3deg;">
+          <div class="h-9 w-9 rounded-full bg-sky-100 dark:bg-sky-900/40 grid place-items-center text-sky-600 dark:text-sky-300 font-bold text-xs">342</div>
+          <div>
+            <p class="text-sm font-semibold text-slate-900 dark:text-white">Members</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500">active</p>
+          </div>
+        </div>
+
+        <div class="hero-float absolute bottom-6 left-2 sm:left-8 rounded-2xl bg-white dark:bg-slate-900 shadow-xl px-4 py-3 flex items-center gap-3" style="--tilt:2deg;">
+          <div class="h-9 w-9 rounded-full bg-amber-100 dark:bg-amber-900/40 grid place-items-center text-amber-600 dark:text-amber-300 font-bold text-xs">27</div>
+          <div>
+            <p class="text-sm font-semibold text-slate-900 dark:text-white">Active loans</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500">right now</p>
+          </div>
+        </div>
+
+        <div class="hero-float absolute bottom-0 right-4 sm:right-8 rounded-2xl bg-white dark:bg-slate-900 shadow-xl px-4 py-3 flex items-center gap-3" style="--tilt:-2deg;">
+          <div class="h-9 w-9 rounded-full bg-emerald-100 dark:bg-emerald-900/40 grid place-items-center text-emerald-600 dark:text-emerald-300 font-bold text-xs">✓</div>
+          <div>
+            <p class="text-sm font-semibold text-slate-900 dark:text-white">Auto fines</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500">zero manual work</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="max-w-6xl mx-auto px-6 py-24 space-y-28">
+    {% set features = [
+      {
+        'title': 'A catalog that scales with you',
+        'body': 'Add titles manually or bulk-import from an external library API. Search, edit, and track stock in real time, with race-safe stock updates under concurrent load.',
+        'accent': 'brand',
+        'points': ['Search by title or author', 'Bulk import', 'Per-book rent fee configuration'],
+      },
+      {
+        'title': 'Issue & return, without double-booking',
+        'body': 'Atomic stock claims mean two staff members can never issue the last copy twice. Returns auto-calculate late fees after a configurable grace period.',
+        'accent': 'sky',
+        'points': ['Atomic concurrency-safe transactions', '7-day grace period', 'Automatic fee calculation'],
+      },
+      {
+        'title': 'Every organization, fully isolated',
+        'body': 'Each library operates in its own workspace — its own books, members, transactions, and staff. No cross-tenant visibility, ever.',
+        'accent': 'amber',
+        'points': ['Org-scoped data on every query', 'Admin & staff roles', 'Per-org user management'],
+      },
+    ] %}
+    {% for f in features %}
+    {% set reversed = loop.index is even %}
+    <div data-reveal class="grid lg:grid-cols-2 gap-10 items-center">
+      <div class="{{ 'lg:order-2' if reversed else '' }}">
+        <span class="inline-block rounded-full bg-{{ f.accent }}-50 dark:bg-{{ f.accent }}-900/30 text-{{ f.accent }}-700 dark:text-{{ f.accent }}-300 text-xs font-semibold px-3 py-1 mb-4">
+          0{{ loop.index }}
+        </span>
+        <h3 class="text-2xl font-semibold text-slate-900 dark:text-white">{{ f.title }}</h3>
+        <p class="mt-3 text-slate-600 dark:text-slate-400">{{ f.body }}</p>
+        <ul class="mt-5 space-y-2">
+          {% for p in f.points %}
+          <li class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-{{ f.accent }}-500 shrink-0"><path d="m5 13 4 4L19 7"/></svg>
+            {{ p }}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="{{ 'lg:order-1' if reversed else '' }} rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl shadow-lg p-6 h-56 flex items-center justify-center">
+        <div class="h-14 w-14 rounded-2xl bg-{{ f.accent }}-100 dark:bg-{{ f.accent }}-900/40 grid place-items-center">
+          <span class="text-2xl font-bold text-{{ f.accent }}-600 dark:text-{{ f.accent }}-300">0{{ loop.index }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </section>
+
+  <!-- How it works -->
+  <section id="how-it-works" class="max-w-6xl mx-auto px-6 pb-24">
+    <div data-reveal class="text-center max-w-xl mx-auto mb-14">
+      <h2 class="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white">Up and running in three steps</h2>
+      <p class="mt-3 text-slate-600 dark:text-slate-400">No installs, no setup calls — start managing your library today.</p>
+    </div>
+    <div class="grid sm:grid-cols-3 gap-6">
+      {% for step in [
+        {'n': 1, 'title': 'Create your organization', 'body': 'Sign up with your library name and email — your isolated workspace is ready instantly.'},
+        {'n': 2, 'title': 'Add your catalog & members', 'body': 'Import books in bulk or add them one by one, then register your members.'},
+        {'n': 3, 'title': 'Issue, return, done', 'body': 'Track loans and fines automatically, and invite staff with the right level of access.'},
+      ] %}
+      <div data-reveal data-reveal-delay="{{ loop.index0 * 100 }}" class="rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl shadow-sm p-6">
+        <div class="h-9 w-9 rounded-full bg-brand-600 text-white font-semibold grid place-items-center mb-4">{{ step.n }}</div>
+        <h3 class="font-semibold text-slate-900 dark:text-white">{{ step.title }}</h3>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">{{ step.body }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    <div data-reveal class="rounded-3xl bg-gradient-to-br from-brand-600 to-brand-800 px-8 py-14 text-center text-white shadow-2xl shadow-brand-900/30">
+      <h2 class="text-2xl sm:text-3xl font-semibold">Ready to modernize your library?</h2>
+      <p class="mt-3 text-brand-100 max-w-md mx-auto">Set up your organization in under a minute — free to start.</p>
+      <a href="{{ url_for('auth.signup') }}" data-magnetic="0.35" class="inline-block mt-6 rounded-full bg-white text-brand-700 text-sm font-semibold px-7 py-3.5 hover:bg-brand-50 transition-colors">
+        Create your organization
+      </a>
+    </div>
+  </section>
+
+  <footer class="border-t border-slate-200/70 dark:border-slate-800 py-8 text-center text-xs text-slate-400 dark:text-slate-500">
+    LibraryOS — a library management workspace.
+  </footer>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/hero-motion.js') }}"></script>
+{% endblock %}

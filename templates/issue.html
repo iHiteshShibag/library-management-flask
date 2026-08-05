@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Issue book{% endblock %}
+{% block page_title %}Issue book{% endblock %}
+{% block content %}
+<div class="max-w-xl rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl shadow-sm p-6">
+  {% if not books or not members %}
+  <p class="text-sm text-slate-500 dark:text-slate-400">
+    {% if not books %}No books are currently in stock.{% endif %}
+    {% if not members %}No members are registered yet.{% endif %}
+    Add {{ 'books' if not books else '' }}{{ ' and ' if not books and not members else '' }}{{ 'members' if not members else '' }} before issuing.
+  </p>
+  {% else %}
+  <form method="post" class="space-y-4">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Book</label>
+      <select name="book_id" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+        {% for b in books %}
+          <option value="{{ b.id }}">{{ b.title }} (Stock: {{ b.stock }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Member</label>
+      <select name="member_id" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+        {% for m in members %}
+          <option value="{{ m.id }}">{{ m.name }} (Debt: ₹{{ '%.2f'|format(m.debt) }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button data-magnetic="0.15" class="rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 transition-colors">Issue book</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

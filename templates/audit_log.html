@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Audit log{% endblock %}
+{% block page_title %}Audit log{% endblock %}
+{% block content %}
+
+<div class="appear rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl shadow-sm overflow-hidden" style="animation-delay: 0ms">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="text-xs uppercase text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/40">
+        <tr>
+          <th class="text-left font-medium px-5 py-2.5">When</th>
+          <th class="text-left font-medium px-5 py-2.5">User</th>
+          <th class="text-left font-medium px-5 py-2.5">Action</th>
+          <th class="text-left font-medium px-5 py-2.5">Details</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+        {% for entry in pagination.items %}
+        <tr class="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40">
+          <td class="px-5 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td class="px-5 py-3">{{ entry.user.display_name if entry.user else 'System' }}</td>
+          <td class="px-5 py-3 font-medium text-slate-900 dark:text-white">{{ entry.action }}</td>
+          <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ entry.description }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="px-5 py-6 text-center text-slate-400">No activity recorded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if pagination.pages > 1 %}
+  <div class="flex items-center justify-between px-5 py-3 border-t border-slate-200/70 dark:border-slate-800 text-sm">
+    <span class="text-slate-500 dark:text-slate-400">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+    <div class="flex gap-2">
+      {% if pagination.has_prev %}
+        <a href="{{ url_for('audit.audit_log', page=pagination.prev_num) }}" class="rounded-lg border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Previous</a>
+      {% endif %}
+      {% if pagination.has_next %}
+        <a href="{{ url_for('audit.audit_log', page=pagination.next_num) }}" class="rounded-lg border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Next</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

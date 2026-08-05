@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Import books{% endblock %}
+{% block page_title %}Import books{% endblock %}
+{% block content %}
+<div class="max-w-xl rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl shadow-sm p-6">
+  <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Pull titles directly from the Frappe Library API into your catalog.</p>
+  <form method="post" class="space-y-4">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Title search</label>
+      <input name="title" placeholder="e.g. Harry Potter" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Start page</label>
+        <input name="page" type="number" value="1" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Number to import (max 200)</label>
+        <input name="count" type="number" value="20" min="1" max="200" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+      </div>
+    </div>
+    <div class="flex gap-3">
+      <button data-magnetic="0.15" class="rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 transition-colors">Import</button>
+      <a href="{{ url_for('books.books') }}" class="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Back to books</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

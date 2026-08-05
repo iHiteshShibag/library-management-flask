@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block page_title %}My profile{% endblock %}
+{% block content %}
+
+<div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl shadow-sm p-5 max-w-xl">
+  <h2 class="font-semibold text-slate-900 dark:text-white mb-4">My profile</h2>
+  <form method="post" action="{{ url_for('settings.profile') }}" class="space-y-3">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+      <input type="email" value="{{ current_user.email }}" disabled
+             class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/60 px-3 py-2 text-sm text-slate-500 dark:text-slate-400">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Name</label>
+      <input name="name" type="text" maxlength="200" value="{{ current_user.name or '' }}"
+             placeholder="Your name"
+             class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+    </div>
+    <button data-magnetic="0.15" class="rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 transition-colors">Save changes</button>
+  </form>
+</div>
+
+<div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl shadow-sm p-5 max-w-xl">
+  <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Change password</h2>
+  <form method="post" action="{{ url_for('settings.change_password') }}" class="space-y-3">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Current password</label>
+      <input name="current_password" type="password" required
+             class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">New password</label>
+      <input name="new_password" type="password" required minlength="8"
+             class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+    </div>
+    <button data-magnetic="0.15" class="rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 transition-colors">Update password</button>
+  </form>
+</div>
+
+<div class="rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl shadow-sm p-5 max-w-xl">
+  <h2 class="font-semibold text-slate-900 dark:text-white mb-1">API key</h2>
+  <p class="text-xs text-slate-400 dark:text-slate-500 mb-4">Use this key to call the REST API: <code class="text-[11px]">Authorization: Bearer &lt;key&gt;</code></p>
+  <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">
+    {% if current_user.api_key %}An API key is active (hidden — regenerate to see a new one).{% else %}No API key generated yet.{% endif %}
+  </p>
+  <div class="flex gap-3">
+    <form method="post" action="{{ url_for('settings.generate_api_key') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 transition-colors">
+        {{ 'Regenerate key' if current_user.api_key else 'Generate key' }}
+      </button>
+    </form>
+    {% if current_user.api_key %}
+    <form method="post" action="{{ url_for('settings.revoke_api_key') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="rounded-lg border border-red-200 dark:border-red-900 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40" onclick="return confirm('Revoke your API key?')">Revoke</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
